@@ -1,0 +1,35 @@
+<launch>
+  <!--usb_cam-->
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen">
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="usb_cam" />
+    <param name="autoexposure" value="false" />
+    <param name="exposure" value="60" />
+    <param name="io_method" value="mmap" />
+  </node>
+
+  <!--darknet_ros -->
+  <arg name="yolo_weights_path"
+      default="$(find darknet_ros)/yolo_network_config/weights"/>
+  <arg name="yolo_config_path"
+      default="$(find darknet_ros)/yolo_network_config/cfg"/>
+  <arg name="ros_param_file"
+      default="$(find darknet_ros)/config/ros.yaml"/>
+  <arg name="network_param_file"
+      default="$(find darknet_ros)/config/yolov2-voc.yaml"/>
+
+  <rosparam command="load" ns="darknet_ros" file="$(arg ros_param_file)"/>
+  <rosparam command="load" ns="darknet_ros" fiel="$(arg network_param_file)"/>
+  <arg name="launch_prefix" default=""/>
+
+  <node pkg="darknet_ros" type="darknet_ros" name="darknet_ros"
+      launch-prefix="$(arg launch_prefix)">
+    <param name="weights_path" value="$(arg yolo_weights_path)" />
+    <param name="config_path" value="$(arg yolo_config_path)" />
+    <remap from="/camera/rgb/image_raw" to="/usb_cam/image_raw"/>
+  </node>
+
+</launch>
